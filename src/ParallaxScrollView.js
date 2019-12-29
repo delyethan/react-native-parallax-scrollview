@@ -168,12 +168,23 @@ export default class ParallaxScrollView extends Component {
     }
     const extraHight = orientation === 'portrait' ? topPadding : topPaddingLandscape
     const paddingTop = Platform.OS === 'android' ? StatusBar.currentHeight : ifIphoneX(extraHight, 0)
-
+    let prevPaddingTop = 0
+    if (headerStyle != undefined) {
+      if (Array.isArray(headerStyle)) {
+        const array = newHeaderStyle.filter(m => m.paddingTop).map(m => m.paddingTop)
+        prevPaddingTop = array[array.length - 1]
+        headerStyle.map(m => { delete m.paddingTop; return m })
+      } else {
+        prevPaddingTop = headerStyle && headerStyle.paddingTop ? headerStyle.paddingTop : 0
+        delete headerStyle['paddingTop']
+      }
+    }
     if (this.props.navBarView) {
       return (
         <AnimatedSafeAreaView
+          emulateUnlessSupported={true}
           style={[{
-            paddingTop: androidFullScreen ? paddingTop : undefined,
+            paddingTop: androidFullScreen ? paddingTop : 0,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
@@ -181,7 +192,7 @@ export default class ParallaxScrollView extends Component {
               outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
             })
-          }, headerStyle]}
+          }]}
         >
           {this.props.navBarView}
         </AnimatedSafeAreaView>
@@ -190,8 +201,9 @@ export default class ParallaxScrollView extends Component {
     else {
       return (
         <AnimatedSafeAreaView
+          emulateUnlessSupported={true}
           style={[{
-            paddingTop: androidFullScreen ? paddingTop : androidFullScreen,
+            paddingTop: (androidFullScreen ? paddingTop : 0) + prevPaddingTop,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
@@ -199,15 +211,15 @@ export default class ParallaxScrollView extends Component {
               outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
             })
-          }, headerStyle]}
+          }]}
         >
           {leftIcon &&
             <View
-              style={{
+              style={[{
                 flex: 1,
                 justifyContent: 'center',
-                alignItems: 'center'
-              }}
+                alignItems: 'center',
+              }, headerStyle]}
             >
               <Icon
                 name={leftIcon && leftIcon.name || 'menu'}
@@ -303,7 +315,6 @@ export default class ParallaxScrollView extends Component {
 
   render() {
     const { style, ...props } = this.props;
-
     return (
       <View style={[styles.container, style]}>
         {this.renderBackground()}
@@ -350,6 +361,5 @@ ParallaxScrollView.propTypes = {
   headerView: PropTypes.node,
   leftIcon: PropTypes.object,
   rightIcon: PropTypes.object,
-  headerStyle: View.propTypes,
   androidFullScreen: PropTypes.bool
 };
