@@ -148,6 +148,7 @@ import ParallaxScrollView from 'react-native-parallax-scrollview';
 | rightIcon | none | object | Pass in the right icon name and type etc as an object. ```rightIcon={{name: 'user', color: 'blue', size: 30, type: 'font-awesome'}}```|
 | rightIconOnPress | none | callback | Callback function when the right icon is pressed |
 | rightIconUnderlayColor | 'transparent' | string | Underlay color for the right icon. |
+| headerStyle | none | ViewStyle | HeaderStyle |
 | *children* | List View | React Components | Render any react views/components as children and these will be rendered below the headerView |
 
 ## Try it out

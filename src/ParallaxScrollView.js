@@ -139,7 +139,8 @@ export default class ParallaxScrollView extends Component {
   rendernavBar() {
     const {
       windowHeight, backgroundSource, leftIcon,
-      rightIcon, leftIconOnPress, rightIconOnPress, navBarColor, navBarHeight, leftIconUnderlayColor, rightIconUnderlayColor
+      rightIcon, leftIconOnPress, rightIconOnPress, navBarColor, navBarHeight, leftIconUnderlayColor, rightIconUnderlayColor,
+      headerStyle
     } = this.props;
     const { scrollY } = this.state;
     if (!windowHeight || !backgroundSource) {
@@ -152,7 +153,7 @@ export default class ParallaxScrollView extends Component {
     {
         return (
           <Animated.View
-            style={{
+            style={[{
               height: newNavBarHeight,
               width: SCREEN_WIDTH,
               flexDirection: 'row',
@@ -161,7 +162,7 @@ export default class ParallaxScrollView extends Component {
                 outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
                 extrapolate: 'clamp'
               })
-            }}
+            },headerStyle]}
           >
           {this.props.navBarView}
           </Animated.View>
@@ -171,7 +172,7 @@ export default class ParallaxScrollView extends Component {
     {
         return (
           <Animated.View
-            style={{
+            style={[{
               height: newNavBarHeight,
               width: SCREEN_WIDTH,
               flexDirection: 'row',
@@ -180,7 +181,7 @@ export default class ParallaxScrollView extends Component {
                 outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
                 extrapolate: 'clamp'
               })
-            }}
+            },headerStyle]}
           >
           {leftIcon &&
             <View
@@ -330,5 +331,6 @@ ParallaxScrollView.propTypes = {
   userTitle: PropTypes.string,
   headerView: PropTypes.node,
   leftIcon: PropTypes.object,
-  rightIcon: PropTypes.object
+  rightIcon: PropTypes.object,
+  headerStyle:View.propTypes
 };
