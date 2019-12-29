@@ -149,6 +149,7 @@ import ParallaxScrollView from 'react-native-parallax-scrollview';
 | rightIconOnPress | none | callback | Callback function when the right icon is pressed |
 | rightIconUnderlayColor | 'transparent' | string | Underlay color for the right icon. |
 | headerStyle | none | ViewStyle | HeaderStyle |
+| androidFullScreen | false | boolean | for who set android overlap |
 | *children* | List View | React Components | Render any react views/components as children and these will be rendered below the headerView |
 
 ## Try it out

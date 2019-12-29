@@ -6,14 +6,22 @@ import {
   View,
   Image,
   Animated,
-  ScrollView
+  ScrollView,
+  SafeAreaView,
+  Dimensions,
+  Platform,
+  StatusBar
 } from 'react-native';
+import { ifIphoneX } from 'react-native-iphone-x-helper'
+import { getInset } from 'react-native-safe-area-view';
 
 import { Icon, List, ListItem } from 'react-native-elements';
 
 import { USER, FACEBOOK_LIST, SLACK_LIST, GENERIC_LIST, SCREEN_WIDTH, SCREEN_HEIGHT, DEFAULT_WINDOW_MULTIPLIER, DEFAULT_NAVBAR_HEIGHT } from './constants';
 
 import styles from './styles';
+
+const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView)
 
 const ScrollViewPropTypes = ScrollView.propTypes;
 
@@ -22,15 +30,27 @@ export default class ParallaxScrollView extends Component {
     super();
 
     this.state = {
-      scrollY: new Animated.Value(0)
+      scrollY: new Animated.Value(0),
+      orientation: 'portrait',
+      topPadding: getInset('top', false),
+      topPaddingLandscape: getInset('top', true),
     };
+    const isPortrait = () => {
+      const dim = Dimensions.get('screen');
+      return dim.height >= dim.width;
+    };
+    Dimensions.addEventListener('change', () => {
+      this.setState({
+        orientation: isPortrait() ? 'portrait' : 'landscape'
+      });
+    });
   }
 
   scrollTo(where) {
     if (!this._scrollView) return;
     this._scrollView.scrollTo(where);
   }
-  
+
   renderBackground() {
     var { windowHeight, backgroundSource, onBackgroundLoadEnd, onBackgroundLoadError } = this.props;
     var { scrollY } = this.state;
@@ -75,7 +95,7 @@ export default class ParallaxScrollView extends Component {
       return null;
     }
 
-    const newNavBarHeight = navBarHeight || DEFAULT_NAVBAR_HEIGHT;    
+    const newNavBarHeight = navBarHeight || DEFAULT_NAVBAR_HEIGHT;
     const newWindowHeight = windowHeight - newNavBarHeight;
 
     return (
@@ -87,22 +107,22 @@ export default class ParallaxScrollView extends Component {
           })
         }}
       >
-        <View style={{height: newWindowHeight, justifyContent: 'center', alignItems: 'center'}}>
+        <View style={{ height: newWindowHeight, justifyContent: 'center', alignItems: 'center' }}>
           {this.props.headerView ||
             (
               <View>
                 <View
                   style={styles.avatarView}
                 >
-                {(typeof userImage === "string" || userImage instanceof String) ?
-                <Image source={{uri:userImage || USER.image}} style={{height: 120, width: 120, borderRadius: 60}} />
-                :
-                  <Image source={userImage || USER.image} style={{height: 120, width: 120, borderRadius: 60}} />
-                }
+                  {(typeof userImage === "string" || userImage instanceof String) ?
+                    <Image source={{ uri: userImage || USER.image }} style={{ height: 120, width: 120, borderRadius: 60 }} />
+                    :
+                    <Image source={userImage || USER.image} style={{ height: 120, width: 120, borderRadius: 60 }} />
+                  }
                 </View>
-                <View style={{paddingVertical: 10}}>
-                  <Text style={{textAlign: 'center', fontSize: 22, color: 'white', paddingBottom: 5}}>{userName || USER.name}</Text>
-                  <Text style={{textAlign: 'center', fontSize: 17, color: 'rgba(247,247, 250, 1)', paddingBottom: 5}}>{userTitle || USER.title}</Text>
+                <View style={{ paddingVertical: 10 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 22, color: 'white', paddingBottom: 5 }}>{userName || USER.name}</Text>
+                  <Text style={{ textAlign: 'center', fontSize: 17, color: 'rgba(247,247, 250, 1)', paddingBottom: 5 }}>{userTitle || USER.title}</Text>
                 </View>
               </View>
             )
@@ -129,9 +149,9 @@ export default class ParallaxScrollView extends Component {
         }}
       >
         {navBarTitleComponent ||
-        <Text style={{ fontSize: 18, fontWeight: '600', color: navBarTitleColor || 'white' }}>
-          {this.props.navBarTitle || USER.name}
-        </Text>}
+          <Text style={{ fontSize: 18, fontWeight: '600', color: navBarTitleColor || 'white' }}>
+            {this.props.navBarTitle || USER.name}
+          </Text>}
       </Animated.View>
     );
   }
@@ -140,49 +160,47 @@ export default class ParallaxScrollView extends Component {
     const {
       windowHeight, backgroundSource, leftIcon,
       rightIcon, leftIconOnPress, rightIconOnPress, navBarColor, navBarHeight, leftIconUnderlayColor, rightIconUnderlayColor,
-      headerStyle
+      headerStyle, androidFullScreen
     } = this.props;
-    const { scrollY } = this.state;
+    const { scrollY, orientation, topPaddingLandscape, topPadding } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
     }
+    const extraHight = orientation === 'portrait' ? topPadding : topPaddingLandscape
+    const paddingTop = Platform.OS === 'android' ? StatusBar.currentHeight : ifIphoneX(extraHight, 0)
 
-    const newNavBarHeight = navBarHeight || DEFAULT_NAVBAR_HEIGHT;
-
-    if(this.props.navBarView)
-    {
-        return (
-          <Animated.View
-            style={[{
-              height: newNavBarHeight,
-              width: SCREEN_WIDTH,
-              flexDirection: 'row',
-              backgroundColor: scrollY.interpolate({
-                inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
-                outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
-                extrapolate: 'clamp'
-              })
-            },headerStyle]}
-          >
+    if (this.props.navBarView) {
+      return (
+        <AnimatedSafeAreaView
+          style={[{
+            paddingTop: androidFullScreen ? paddingTop : undefined,
+            width: SCREEN_WIDTH,
+            flexDirection: 'row',
+            backgroundColor: scrollY.interpolate({
+              inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
+              outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
+              extrapolate: 'clamp'
+            })
+          }, headerStyle]}
+        >
           {this.props.navBarView}
-          </Animated.View>
-        );                
+        </AnimatedSafeAreaView>
+      );
     }
-    else
-    {
-        return (
-          <Animated.View
-            style={[{
-              height: newNavBarHeight,
-              width: SCREEN_WIDTH,
-              flexDirection: 'row',
-              backgroundColor: scrollY.interpolate({
-                inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
-                outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
-                extrapolate: 'clamp'
-              })
-            },headerStyle]}
-          >
+    else {
+      return (
+        <AnimatedSafeAreaView
+          style={[{
+            paddingTop: androidFullScreen ? paddingTop : androidFullScreen,
+            width: SCREEN_WIDTH,
+            flexDirection: 'row',
+            backgroundColor: scrollY.interpolate({
+              inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
+              outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
+              extrapolate: 'clamp'
+            })
+          }, headerStyle]}
+        >
           {leftIcon &&
             <View
               style={{
@@ -201,17 +219,17 @@ export default class ParallaxScrollView extends Component {
               />
             </View>
           }
-            <View
-              style={{
-                flex: 5,
-                justifyContent: 'center',
-                alignItems: 'center',
-                alignSelf: 'center'
-              }}
-            >
-              {this.renderNavBarTitle()}
-            </View>
-          {rightIcon &&         
+          <View
+            style={{
+              flex: 5,
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'center'
+            }}
+          >
+            {this.renderNavBarTitle()}
+          </View>
+          {rightIcon &&
             <View
               style={{
                 flex: 1,
@@ -229,8 +247,8 @@ export default class ParallaxScrollView extends Component {
               />
             </View>
           }
-          </Animated.View>
-        );        
+        </AnimatedSafeAreaView>
+      );
     }
   }
 
@@ -238,46 +256,46 @@ export default class ParallaxScrollView extends Component {
     return (
       <View style={styles.listView}>
         <List>
-        {
-          FACEBOOK_LIST.map((item, index) => (
-            <ListItem
-              key={index}
-              onPress={() => console.log('List item pressed')}
-              title={item.title}
-              leftIcon={{name: item.icon}} />
-          ))
-        }
+          {
+            FACEBOOK_LIST.map((item, index) => (
+              <ListItem
+                key={index}
+                onPress={() => console.log('List item pressed')}
+                title={item.title}
+                leftIcon={{ name: item.icon }} />
+            ))
+          }
         </List>
         <List>
-        {
-          SLACK_LIST.map((item, index) => (
-            <ListItem
-              key={index}
-              onPress={() => console.log('List item pressed')}
-              title={item.title}
-              leftIcon={{name: item.icon}} />
-          ))
-        }
+          {
+            SLACK_LIST.map((item, index) => (
+              <ListItem
+                key={index}
+                onPress={() => console.log('List item pressed')}
+                title={item.title}
+                leftIcon={{ name: item.icon }} />
+            ))
+          }
         </List>
         <List>
-        {
-          GENERIC_LIST.map((item, index) => (
-            <ListItem
-              key={index}
-              onPress={() => console.log('List item pressed')}
-              title={item.title}
-              leftIcon={{name: item.icon}} />
-          ))
-        }
+          {
+            GENERIC_LIST.map((item, index) => (
+              <ListItem
+                key={index}
+                onPress={() => console.log('List item pressed')}
+                title={item.title}
+                leftIcon={{ name: item.icon }} />
+            ))
+          }
         </List>
-        <List containerStyle={{marginBottom: 15}}>
+        <List containerStyle={{ marginBottom: 15 }}>
           <ListItem
             key={1}
             hideChevron={true}
             onPress={() => console.log('Logout Pressed')}
             title='LOGOUT'
             titleStyle={styles.logoutText}
-            icon={{name: ''}} />
+            icon={{ name: '' }} />
         </List>
       </View>
     );
@@ -312,7 +330,7 @@ export default class ParallaxScrollView extends Component {
 }
 
 ParallaxScrollView.defaultProps = {
-  backgroundSource: {uri: 'http://i.imgur.com/6Iej2c3.png'},
+  backgroundSource: { uri: 'http://i.imgur.com/6Iej2c3.png' },
   windowHeight: SCREEN_HEIGHT * DEFAULT_WINDOW_MULTIPLIER,
   leftIconOnPress: () => console.log('Left icon pressed'),
   rightIconOnPress: () => console.log('Right icon pressed')
@@ -332,5 +350,6 @@ ParallaxScrollView.propTypes = {
   headerView: PropTypes.node,
   leftIcon: PropTypes.object,
   rightIcon: PropTypes.object,
-  headerStyle:View.propTypes
+  headerStyle: View.propTypes,
+  androidFullScreen: PropTypes.bool
 };
