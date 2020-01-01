@@ -89,7 +89,7 @@ export default class ParallaxScrollView extends Component {
   }
 
   renderHeaderView() {
-    const { windowHeight, backgroundSource, userImage, userName, userTitle, navBarHeight } = this.props;
+    const { windowHeight, backgroundSource, userImage, userName, userTitle, navBarHeight, headerViewStyle } = this.props;
     const { scrollY } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
@@ -100,12 +100,12 @@ export default class ParallaxScrollView extends Component {
 
     return (
       <Animated.View
-        style={{
+        style={[{
           opacity: scrollY.interpolate({
             inputRange: [-windowHeight, 0, windowHeight * DEFAULT_WINDOW_MULTIPLIER + newNavBarHeight],
             outputRange: [1, 1, 0]
           })
-        }}
+        }, headerViewStyle]}
       >
         <View style={{ height: newWindowHeight }}>
           {this.props.headerView ||
