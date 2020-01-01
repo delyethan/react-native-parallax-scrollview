@@ -107,7 +107,7 @@ export default class ParallaxScrollView extends Component {
           })
         }}
       >
-        <View style={{ height: newWindowHeight, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ height: newWindowHeight }}>
           {this.props.headerView ||
             (
               <View>
