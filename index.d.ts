@@ -22,6 +22,7 @@ declare module 'react-native-parallax-scrollview' {
     rightIconOnPress?: () => void,
     androidFullScreen?: boolean,
     headerViewStyle?: StyleProp<ViewStyle>,
+    scrollableViewStyle?: StyleProp<ViewStyle>
   }
 
   export default class ParallaxScrollView extends React.Component<Props>{ }
