@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import {
   Text,
   View,
-  Image,
   Animated,
   ScrollView,
   SafeAreaView,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import { ifIphoneX } from 'react-native-iphone-x-helper'
 import { getInset } from 'react-native-safe-area-view';
+import FastImage from 'react-native-fast-image'
 
 import { Icon, List, ListItem } from 'react-native-elements';
 
@@ -22,6 +22,7 @@ import { USER, FACEBOOK_LIST, SLACK_LIST, GENERIC_LIST, SCREEN_WIDTH, SCREEN_HEI
 import styles from './styles';
 
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView)
+const AnimatedFastImage = Animated.createAnimatedComponent(FastImage)
 
 const ScrollViewPropTypes = ScrollView.propTypes;
 
@@ -34,6 +35,7 @@ export default class ParallaxScrollView extends Component {
       orientation: 'portrait',
       topPadding: getInset('top', false),
       topPaddingLandscape: getInset('top', true),
+      navHeight: 100,
     };
     const isPortrait = () => {
       const dim = Dimensions.get('screen');
@@ -59,7 +61,7 @@ export default class ParallaxScrollView extends Component {
     }
 
     return (
-      <Animated.Image
+      <AnimatedFastImage
         style={[
           styles.background,
           {
@@ -84,13 +86,13 @@ export default class ParallaxScrollView extends Component {
         onLoadEnd={onBackgroundLoadEnd}
         onError={onBackgroundLoadError}
       >
-      </Animated.Image>
+      </AnimatedFastImage>
     );
   }
 
   renderHeaderView() {
     const { windowHeight, backgroundSource, userImage, userName, userTitle, navBarHeight, headerViewStyle } = this.props;
-    const { scrollY } = this.state;
+    const { scrollY, navHeight } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
     }
@@ -102,8 +104,9 @@ export default class ParallaxScrollView extends Component {
       <Animated.View
         style={[{
           opacity: scrollY.interpolate({
-            inputRange: [-windowHeight, 0, windowHeight * DEFAULT_WINDOW_MULTIPLIER + newNavBarHeight],
-            outputRange: [1, 1, 0]
+            inputRange: [-windowHeight, 0, (windowHeight - (navHeight * 2)) * 0.8 + newNavBarHeight],
+            // inputRange: [-windowHeight, 0, windowHeight * DEFAULT_WINDOW_MULTIPLIER + newNavBarHeight],
+            outputRange: [1, 1, 0.3]
           })
         }, headerViewStyle]}
       >
@@ -115,9 +118,9 @@ export default class ParallaxScrollView extends Component {
                   style={styles.avatarView}
                 >
                   {(typeof userImage === "string" || userImage instanceof String) ?
-                    <Image source={{ uri: userImage || USER.image }} style={{ height: 120, width: 120, borderRadius: 60 }} />
+                    <FastImage source={{ uri: userImage || USER.image }} style={{ height: 120, width: 120, borderRadius: 60 }} />
                     :
-                    <Image source={userImage || USER.image} style={{ height: 120, width: 120, borderRadius: 60 }} />
+                    <FastImage source={userImage || USER.image} style={{ height: 120, width: 120, borderRadius: 60 }} />
                   }
                 </View>
                 <View style={{ paddingVertical: 10 }}>
@@ -162,7 +165,7 @@ export default class ParallaxScrollView extends Component {
       rightIcon, leftIconOnPress, rightIconOnPress, navBarColor, navBarHeight, leftIconUnderlayColor, rightIconUnderlayColor,
       headerStyle, androidFullScreen
     } = this.props;
-    const { scrollY, orientation, topPaddingLandscape, topPadding } = this.state;
+    const { scrollY, orientation, topPaddingLandscape, topPadding, navHeight } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
     }
@@ -182,18 +185,20 @@ export default class ParallaxScrollView extends Component {
     if (this.props.navBarView) {
       return (
         <AnimatedSafeAreaView
+          onLayout={ref => ref.nativeEvent ? this.setState({ navHeight: ref.nativeEvent.layout.height }) : null}
           emulateUnlessSupported={true}
           style={[{
-            paddingTop: androidFullScreen ? paddingTop : 0,
+            paddingTop: (androidFullScreen ? paddingTop : 0) + prevPaddingTop,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
-              inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
-              outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
+              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
+              outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,0)', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
             })
           }]}
         >
+          {/* <StatusBar barStyle={windowHeight - (navHeight * 2) ? 'dark-content' : 'light-content'} /> */}
           {this.props.navBarView}
         </AnimatedSafeAreaView>
       );
@@ -201,16 +206,17 @@ export default class ParallaxScrollView extends Component {
     else {
       return (
         <AnimatedSafeAreaView
+          onLayout={ref => ref.nativeEvent ? this.setState({ navHeight: ref.nativeEvent.layout.height }) : null}
           emulateUnlessSupported={true}
           style={[{
             paddingTop: (androidFullScreen ? paddingTop : 0) + prevPaddingTop,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
-              inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
-              outputRange: ['transparent', 'transparent', navBarColor || 'rgba(0, 0, 0, 1.0)'],
+              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
+              outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,0)', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
-            })
+            }),
           }]}
         >
           {leftIcon &&
@@ -318,7 +324,9 @@ export default class ParallaxScrollView extends Component {
     return (
       <View style={[styles.container, style]}>
         {this.renderBackground()}
-        {this.rendernavBar()}
+        <View style={{ position: 'absolute', top: 0, zIndex: 1 }}>
+          {this.rendernavBar()}
+        </View>
         <ScrollView
           ref={component => {
             this._scrollView = component;
