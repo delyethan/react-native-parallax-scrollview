@@ -10,6 +10,7 @@ declare module 'react-native-parallax-scrollview' {
     navBarTitle?: string,
     navBarTitleColor?: string,
     navBarTitleComponent?: React.ReactElement,
+    navBarView?: React.ReactElement,
     navBarColor?: string,
     userImage?: string,
     userName?: string,
