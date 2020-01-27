@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import {
   Text,
@@ -36,6 +37,7 @@ export default class ParallaxScrollView extends Component {
       topPadding: getInset('top', false),
       topPaddingLandscape: getInset('top', true),
       navHeight: 100,
+      isLight: false
     };
     const isPortrait = () => {
       const dim = Dimensions.get('screen');
@@ -103,11 +105,11 @@ export default class ParallaxScrollView extends Component {
     return (
       <Animated.View
         style={[{
-          opacity: scrollY.interpolate({
-            inputRange: [-windowHeight, 0, (windowHeight - (navHeight * 2)) * 0.8 + newNavBarHeight],
-            // inputRange: [-windowHeight, 0, windowHeight * DEFAULT_WINDOW_MULTIPLIER + newNavBarHeight],
-            outputRange: [1, 1, 0.3]
-          })
+          // opacity: scrollY.interpolate({
+          //   inputRange: [-windowHeight, 0, (windowHeight - (navHeight * 2)) * 0.8 + newNavBarHeight],
+          //   // inputRange: [-windowHeight, 0, windowHeight * DEFAULT_WINDOW_MULTIPLIER + newNavBarHeight],
+          //   outputRange: [1, 1, 0.3]
+          // })
         }, headerViewStyle]}
       >
         <View style={{ height: newWindowHeight }}>
@@ -159,6 +161,15 @@ export default class ParallaxScrollView extends Component {
     );
   }
 
+  checkStatusBarColor = () => {
+    const { windowHeight } = this.props
+    const { scrollY, navHeight } = this.state
+    scrollY.addListener(value => {
+      const isLight = value.value > windowHeight - (navHeight * 2);
+      if (this.state.isLight !== isLight) this.setState({ isLight });
+    })
+  }
+
   rendernavBar() {
     const {
       windowHeight, backgroundSource, leftIcon,
@@ -182,6 +193,7 @@ export default class ParallaxScrollView extends Component {
         delete headerStyle['paddingTop']
       }
     }
+
     if (this.props.navBarView) {
       return (
         <AnimatedSafeAreaView
@@ -198,7 +210,7 @@ export default class ParallaxScrollView extends Component {
             })
           }]}
         >
-          {/* <StatusBar barStyle={windowHeight - (navHeight * 2) ? 'dark-content' : 'light-content'} /> */}
+          <StatusBar animated barStyle={!this.state.isLight ? 'light-content' : 'dark-content'} />
           {this.props.navBarView}
         </AnimatedSafeAreaView>
       );
@@ -333,9 +345,10 @@ export default class ParallaxScrollView extends Component {
           }}
           {...props}
           style={styles.scrollView}
-          onScroll={Animated.event([
-            { nativeEvent: { contentOffset: { y: this.state.scrollY } } }
-          ])}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
+            { listener: _.debounce(this.checkStatusBarColor, 16) }
+          )}
           scrollEventThrottle={16}
         >
           {this.renderHeaderView()}
