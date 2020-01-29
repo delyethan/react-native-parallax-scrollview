@@ -5,6 +5,7 @@ import _ from 'lodash';
 import {
   Text,
   View,
+  Image,
   Animated,
   ScrollView,
   SafeAreaView,
@@ -139,7 +140,7 @@ export default class ParallaxScrollView extends Component {
 
   renderNavBarTitle() {
     const { windowHeight, backgroundSource, navBarTitleColor, navBarTitleComponent } = this.props;
-    const { scrollY } = this.state;
+    const { scrollY, navHeight } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
     }
@@ -147,8 +148,9 @@ export default class ParallaxScrollView extends Component {
     return (
       <Animated.View
         style={{
+          flex: 1,
           opacity: scrollY.interpolate({
-            inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight * 0.8],
+            inputRange: [-windowHeight, windowHeight * DEFAULT_WINDOW_MULTIPLIER, windowHeight - (navHeight * 2)],
             outputRange: [0, 0, 1]
           })
         }}
@@ -211,7 +213,15 @@ export default class ParallaxScrollView extends Component {
           }]}
         >
           <StatusBar animated barStyle={!this.state.isLight ? 'light-content' : 'dark-content'} />
-          {this.props.navBarView}
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            {this.props.navBarView.Left ? <View>
+              {this.props.navBarView.Left}
+            </View> : null}
+            {this.renderNavBarTitle()}
+            {this.props.navBarView.Right ? <View>
+              {this.props.navBarView.Right}
+            </View> : null}
+          </View>
         </AnimatedSafeAreaView>
       );
     }
@@ -370,7 +380,7 @@ ParallaxScrollView.defaultProps = {
 
 ParallaxScrollView.propTypes = {
   ...ScrollViewPropTypes,
-  backgroundSource: PropTypes.object,
+  backgroundSource: PropTypes.any,
   windowHeight: PropTypes.number,
   navBarTitle: PropTypes.string,
   navBarTitleColor: PropTypes.string,
