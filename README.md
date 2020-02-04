@@ -13,6 +13,10 @@
 
 ![Demo gif](./react-native-scroll-view.gif)
 
+## Custom
+
+add header Left ,right component,scroll change status bar ,ts interface .... more
+
 ## Installation
 
 This package has a dependency of React Native Elements. Install RNE first with:
