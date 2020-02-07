@@ -164,12 +164,23 @@ export default class ParallaxScrollView extends Component {
   }
 
   checkStatusBarColor = () => {
-    const { windowHeight } = this.props
-    const { scrollY, navHeight } = this.state
-    scrollY.addListener(value => {
-      const isLight = value.value > windowHeight - (navHeight * 2);
-      if (this.state.isLight !== isLight) this.setState({ isLight });
-    })
+    // const { windowHeight } = this.props
+    // const { scrollY, navHeight } = this.state
+    // scrollY.addListener(value => {
+    //   const isLight = value.value > windowHeight - (navHeight * 2);
+    //   if (isLight === false) {
+    //     if (stateLight === true) {
+    //       stateLight = false
+    //       StatusBar.setBarStyle('light-content')
+    //     }
+    //   }
+    //   if (isLight === true) {
+    //     if (stateLight === false) {
+    //       stateLight = true
+    //       StatusBar.setBarStyle('dark-content')
+    //     }
+    //   }
+    // })
   }
 
   rendernavBar() {
@@ -209,10 +220,18 @@ export default class ParallaxScrollView extends Component {
               inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
               outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,0)', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
-            })
+            }),
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
           }]}
         >
-          <StatusBar animated barStyle={!this.state.isLight ? 'light-content' : 'dark-content'} />
+          {/* <StatusBar animated barStyle={!this.state.isLight ? 'light-content' : 'dark-content'} /> */}
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
             {this.props.navBarView.Left ? <View>
               {this.props.navBarView.Left}
