@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
     resizeMode: 'cover'
   },
   content: {
-    shadowColor: '#222',
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+    // shadowColor: '#222',
+    // shadowOpacity: 0.3,
+    // shadowRadius: 2,
     backgroundColor: '#fff',
     flex: 1,
     flexDirection: 'column'
