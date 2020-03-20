@@ -228,7 +228,7 @@ export default class ParallaxScrollView extends Component {
             },
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
-            elevation: 5,
+            // elevation: 5,
           }]}
         >
           {/* <StatusBar animated barStyle={!this.state.isLight ? 'light-content' : 'dark-content'} /> */}
