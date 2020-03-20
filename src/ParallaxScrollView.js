@@ -150,7 +150,7 @@ export default class ParallaxScrollView extends Component {
         style={{
           flex: 1,
           opacity: scrollY.interpolate({
-            inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
+            inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.3, windowHeight - (navHeight * 2)],
             outputRange: [0, 0, 1]
           })
         }}
@@ -217,7 +217,7 @@ export default class ParallaxScrollView extends Component {
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
-              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
+              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.3, windowHeight - (navHeight * 2)],
               outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,0)', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
             }),
@@ -254,7 +254,7 @@ export default class ParallaxScrollView extends Component {
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
-              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.8, windowHeight - (navHeight * 2)],
+              inputRange: [-windowHeight, (windowHeight - (navHeight * 2)) * 0.3, windowHeight - (navHeight * 2)],
               outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,0)', navBarColor || 'rgba(0, 0, 0, 1.0)'],
               extrapolate: 'clamp'
             }),
