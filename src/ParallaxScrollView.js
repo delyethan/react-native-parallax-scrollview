@@ -14,7 +14,6 @@ import {
   StatusBar
 } from 'react-native';
 import { ifIphoneX } from 'react-native-iphone-x-helper'
-import { getInset } from 'react-native-safe-area-view';
 import FastImage from 'react-native-fast-image'
 
 import { Icon, List, ListItem } from 'react-native-elements';
@@ -28,6 +27,8 @@ const AnimatedFastImage = Animated.createAnimatedComponent(FastImage)
 
 const ScrollViewPropTypes = ScrollView.propTypes;
 
+const getTopSafeArea = useSafeAreaInset()
+
 export default class ParallaxScrollView extends Component {
   constructor() {
     super();
@@ -35,8 +36,8 @@ export default class ParallaxScrollView extends Component {
     this.state = {
       scrollY: new Animated.Value(0),
       orientation: 'portrait',
-      topPadding: getInset('top', false),
-      topPaddingLandscape: getInset('top', true),
+      topPadding: getTopSafeArea.top,
+      topPaddingLandscape: getTopSafeArea.top,
       navHeight: 100,
       isLight: false
     };
