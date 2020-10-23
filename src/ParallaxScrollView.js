@@ -5,16 +5,11 @@ import _ from 'lodash';
 import {
   Text,
   View,
-  Image,
   Animated,
   ScrollView,
-  SafeAreaView,
-  Dimensions,
-  Platform,
-  StatusBar
 } from 'react-native';
-import { ifIphoneX } from 'react-native-iphone-x-helper'
 import FastImage from 'react-native-fast-image'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Icon, List, ListItem } from 'react-native-elements';
 
@@ -27,8 +22,6 @@ const AnimatedFastImage = Animated.createAnimatedComponent(FastImage)
 
 const ScrollViewPropTypes = ScrollView.propTypes;
 
-const getTopSafeArea = useSafeAreaInset()
-
 export default class ParallaxScrollView extends Component {
   constructor() {
     super();
@@ -36,20 +29,9 @@ export default class ParallaxScrollView extends Component {
     this.state = {
       scrollY: new Animated.Value(0),
       orientation: 'portrait',
-      topPadding: getTopSafeArea.top,
-      topPaddingLandscape: getTopSafeArea.top,
       navHeight: 100,
       isLight: false
     };
-    const isPortrait = () => {
-      const dim = Dimensions.get('screen');
-      return dim.height >= dim.width;
-    };
-    Dimensions.addEventListener('change', () => {
-      this.setState({
-        orientation: isPortrait() ? 'portrait' : 'landscape'
-      });
-    });
   }
 
   scrollTo(where) {
@@ -190,22 +172,9 @@ export default class ParallaxScrollView extends Component {
       rightIcon, leftIconOnPress, rightIconOnPress, navBarColor, navBarHeight, leftIconUnderlayColor, rightIconUnderlayColor,
       headerStyle, androidFullScreen
     } = this.props;
-    const { scrollY, orientation, topPaddingLandscape, topPadding, navHeight } = this.state;
+    const { scrollY, navHeight } = this.state;
     if (!windowHeight || !backgroundSource) {
       return null;
-    }
-    const extraHight = orientation === 'portrait' ? topPadding : topPaddingLandscape
-    const paddingTop = Platform.OS === 'android' ? StatusBar.currentHeight : ifIphoneX(extraHight, 0)
-    let prevPaddingTop = 0
-    if (headerStyle != undefined) {
-      if (Array.isArray(headerStyle)) {
-        const array = newHeaderStyle.filter(m => m.paddingTop).map(m => m.paddingTop)
-        prevPaddingTop = array[array.length - 1]
-        headerStyle.map(m => { delete m.paddingTop; return m })
-      } else {
-        prevPaddingTop = headerStyle && headerStyle.paddingTop ? headerStyle.paddingTop : 0
-        delete headerStyle['paddingTop']
-      }
     }
 
     if (this.props.navBarView) {
@@ -213,8 +182,8 @@ export default class ParallaxScrollView extends Component {
         <AnimatedSafeAreaView
           onLayout={ref => ref.nativeEvent ? this.setState({ navHeight: ref.nativeEvent.layout.height }) : null}
           emulateUnlessSupported={true}
+          edges={['left','top','right']}
           style={[{
-            paddingTop: (androidFullScreen ? paddingTop : 0) + prevPaddingTop,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
@@ -250,8 +219,8 @@ export default class ParallaxScrollView extends Component {
         <AnimatedSafeAreaView
           onLayout={ref => ref.nativeEvent ? this.setState({ navHeight: ref.nativeEvent.layout.height }) : null}
           emulateUnlessSupported={true}
+          edges={['left','top','right']}
           style={[{
-            paddingTop: (androidFullScreen ? paddingTop : 0) + prevPaddingTop,
             width: SCREEN_WIDTH,
             flexDirection: 'row',
             backgroundColor: scrollY.interpolate({
