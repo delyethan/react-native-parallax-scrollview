@@ -5,17 +5,11 @@ import _ from 'lodash';
 import {
   Text,
   View,
-  Image,
   Animated,
   ScrollView,
-  SafeAreaView,
-  Dimensions,
-  Platform,
-  StatusBar
 } from 'react-native';
-import { ifIphoneX } from 'react-native-iphone-x-helper'
-import { getInset } from 'react-native-safe-area-view';
 import FastImage from 'react-native-fast-image'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Icon, List, ListItem } from 'react-native-elements';
 
@@ -23,7 +17,13 @@ import { USER, FACEBOOK_LIST, SLACK_LIST, GENERIC_LIST, SCREEN_WIDTH, SCREEN_HEI
 
 import styles from './styles';
 
-const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView)
+class HOCSafeAreaView extends React.Component {
+  render() {
+    return <SafeAreaView {...this.props}/>
+  }
+}
+
+const AnimatedSafeAreaView = Animated.createAnimatedComponent(HOCSafeAreaView)
 const AnimatedFastImage = Animated.createAnimatedComponent(FastImage)
 
 const ScrollViewPropTypes = ScrollView.propTypes;
